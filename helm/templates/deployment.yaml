@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tax-calculator
+  namespace: tax-calculator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tax-calculator
+  template:
+    metadata:
+      labels:
+        app: tax-calculator
+    spec:
+      containers:
+        - name: tax-calculator
+          image: tax-calculator-image
+          imagePullPolicy: IfNotPresent

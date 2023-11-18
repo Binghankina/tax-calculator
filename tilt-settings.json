@@ -1,0 +1,4 @@
+{
+  "allow_k8s_contexts": "default/api-sandbox-ocp-agronod-com:6443/clusteradm",
+  "default_registry": "default-route-openshift-image-registry.apps.sandbox-ocp.agronod.com/{}"
+}
