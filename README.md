@@ -213,7 +213,7 @@ public int getTax(Vehicle vehicle, Date[] dates)
         return totalFee;
     }
 ```
-2. Tax Exempt vehicles should include bus and exclude tractor. 
+2. Tax exempted vehicles should include bus and exclude tractor. 
 ```
 static {
     tollFreeVehicles.put("Motorcycle", 0);
@@ -225,8 +225,8 @@ static {
 }
 ```
 ### Solutions
-1. Implemented new algorithm with sliding window
-- Remove all the free dates from the dates arrayList
+1. Implemented new algorithm with sliding window.
+- Remove all the free dates from the dates arrayList.
 - Sort the dates with ascending order.
 - Use a one-hour sliding window with deque, by using offerLast and pollFirst to move the window to apply the single 
 charge rule. Then store the dates and toll fees in a hashmap.
@@ -234,8 +234,8 @@ charge rule. Then store the dates and toll fees in a hashmap.
   Time complexity: O(n)
   Space complexity: O(k), where k is the number of distinctive dates present in the deque.
 ```
-- Apply the maximum amount per day rule by sum the toll fess in the same date.
-2. Replace tractor with bus, and a car type.  And store the in memory data to DB with a new boolean field
+- Apply the maximum amount per day rule by sum the toll fees in the same date.
+2. Replaced tractor with bus, and a Car type. Stored the in memory data to DB with a new boolean field
 is_toll_free.
 ```
 INSERT INTO vehicle (id, name, is_toll_free) VALUES (1, 'Motorbike', true);
