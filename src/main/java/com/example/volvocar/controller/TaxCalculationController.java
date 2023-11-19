@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TaxCalculationController {
-    private CongestionTaxCalculatorService congestionTaxCalculator;
+    private final CongestionTaxCalculatorService congestionTaxCalculator;
     @Autowired
     public TaxCalculationController(CongestionTaxCalculatorService congestionTaxCalculator) {
         this.congestionTaxCalculator = congestionTaxCalculator;

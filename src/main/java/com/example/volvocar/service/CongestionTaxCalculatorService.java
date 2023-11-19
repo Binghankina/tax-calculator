@@ -22,50 +22,13 @@ public class CongestionTaxCalculatorService {
 
     private static final int interval = 3600000;
 
-    public ArrayList<Date> RemoveFreeChargedDates(List<Date> dates) {
-        ArrayList<Date> chargedDates = new ArrayList<>();
-        for(Date date: dates) {
-            if (getTollFee(dateToCalendar(date)) != 0) {
-                chargedDates.add(date);
-            }
-        }
-        return chargedDates;
-    }
-    public Map<Calendar, Integer> applySingleChargeRule(ArrayList<Date> dates) {
-        Deque<Date> oneHourSlidingWindow = new ArrayDeque<>();
-        Map<Calendar, Integer> fees = new HashMap<>();
-        for(Date date: dates) {
-            if (oneHourSlidingWindow.size() != 0) {
-                if (date.getTime() - oneHourSlidingWindow.peekFirst().getTime() > interval) {
-                    findHighestFee(oneHourSlidingWindow, fees);
-                    while (!oneHourSlidingWindow.isEmpty() &&
-                            date.getTime() - oneHourSlidingWindow.peekFirst().getTime() > interval) {
-                        oneHourSlidingWindow.pollFirst();
-                    }
-                }
-            }
-            oneHourSlidingWindow.offerLast(date);
-        }
-        if(!oneHourSlidingWindow.isEmpty()) {
-            findHighestFee(oneHourSlidingWindow, fees);
-        }
-        return fees;
-    }
-    private void findHighestFee(Deque<Date> oneHourSlidingWindow, Map<Calendar, Integer> fees) {
-        Map<Integer, Calendar> feesInOneHour = new HashMap<>();
-        for (Date date : oneHourSlidingWindow) {
-           feesInOneHour.put(getTollFee(dateToCalendar(date)), dateToCalendar(date));
-        }
-        Optional<Integer> max = feesInOneHour.keySet().stream().max(Integer::compare);
-        max.ifPresent(integer -> fees.put(feesInOneHour.get(integer), integer));
-    }
     public CongestionTax getTax(Vehicle vehicle, List<Date> dates)
     {
         ArrayList<Date> chargedDates = RemoveFreeChargedDates(dates);
         Map<Calendar, Integer> datesAndFees = applySingleChargeRule(new ArrayList<>(chargedDates.stream()
                 .sorted(Date::compareTo)
                 .collect(Collectors.toList())));
-        Calendar initialDate = new Calendar.Builder().setDate(0, 0,0).build();;
+        Calendar initialDate = new Calendar.Builder().setDate(0, 0,0).build();
         int totalFee = 0;
         int totalFeeOfSameDay = 0;
         if (isTollFreeVehicle(vehicle)) {
@@ -88,6 +51,46 @@ public class CongestionTaxCalculatorService {
         return new CongestionTax(totalFee);
     }
 
+    public ArrayList<Date> RemoveFreeChargedDates(List<Date> dates) {
+        ArrayList<Date> chargedDates = new ArrayList<>();
+        for(Date date: dates) {
+            if (getTollFee(dateToCalendar(date)) != 0) {
+                chargedDates.add(date);
+            }
+        }
+        return chargedDates;
+    }
+
+    public Map<Calendar, Integer> applySingleChargeRule(ArrayList<Date> dates) {
+        Deque<Date> oneHourSlidingWindow = new ArrayDeque<>();
+        Map<Calendar, Integer> fees = new HashMap<>();
+        for(Date date: dates) {
+            if (oneHourSlidingWindow.size() != 0) {
+                if (date.getTime() - oneHourSlidingWindow.peekFirst().getTime() > interval) {
+                    findHighestFee(oneHourSlidingWindow, fees);
+                    while (!oneHourSlidingWindow.isEmpty() &&
+                            date.getTime() - oneHourSlidingWindow.peekFirst().getTime() > interval) {
+                        oneHourSlidingWindow.pollFirst();
+                    }
+                }
+            }
+            oneHourSlidingWindow.offerLast(date);
+        }
+        if(!oneHourSlidingWindow.isEmpty()) {
+            findHighestFee(oneHourSlidingWindow, fees);
+        }
+        return fees;
+    }
+
+    private void findHighestFee(Deque<Date> oneHourSlidingWindow, Map<Calendar, Integer> fees) {
+        Map<Integer, Calendar> feesInOneHour = new HashMap<>();
+        for (Date date : oneHourSlidingWindow) {
+           feesInOneHour.put(getTollFee(dateToCalendar(date)), dateToCalendar(date));
+        }
+        Optional<Integer> max = feesInOneHour.keySet().stream().max(Integer::compare);
+        max.ifPresent(integer -> fees.put(feesInOneHour.get(integer), integer));
+    }
+
     protected boolean isTollFreeVehicle(Vehicle vehicle) {
         Optional<VehicleEntity> vehicleEntity = vehicleRepository.findByName(vehicle.getType());
         if (vehicleEntity.isPresent()) {
@@ -95,7 +98,6 @@ public class CongestionTaxCalculatorService {
         } else {
             return false;
         }
-
     }
 
     private int getTollFee(Calendar date)
