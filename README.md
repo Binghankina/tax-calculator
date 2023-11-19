@@ -184,28 +184,33 @@ It violates the singleChargeRule.
 - It assumes the dates are all in one day. If the dates spread over several days. the total fee will be
 the upper-limit for the whole year.
 ```
-public CongestionTax getTax(Vehicle vehicle, Date[] dates) {
+public int getTax(Vehicle vehicle, Date[] dates)
+    {
         Date intervalStart = dates[0];
         int totalFee = 0;
 
-        for (Date date : dates) {
-            int nextFee = getTollFee(date);
-            int tempFee = getTollFee(intervalStart);
+        for (int i = 0; i < dates.length ; i++) {
+            Date date = dates[i];
+            int nextFee = GetTollFee(date, vehicle);
+            int tempFee = GetTollFee(intervalStart, vehicle);
 
             long diffInMillies = date.getTime() - intervalStart.getTime();
-            long minutes = diffInMillies / 1000 / 60;
+            long minutes = diffInMillies/1000/60;
 
-            if (minutes <= 60) {
+            if (minutes <= 60)
+            {
                 if (totalFee > 0) totalFee -= tempFee;
                 if (nextFee >= tempFee) tempFee = nextFee;
                 totalFee += tempFee;
-            } else {
+            }
+            else
+            {
                 totalFee += nextFee;
             }
-        }
-
+        }                
+      
         if (totalFee > 60) totalFee = 60;
-        return new CongestionTax(totalFee);
+        return totalFee;
     }
 ```
 2. Tax Exempt vehicles should include bus and exclude tractor. 
